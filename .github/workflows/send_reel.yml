@@ -1,0 +1,15 @@
+name: Create and Publish Reel on Instagram
+on: 
+    workflow_dispatch:
+
+jobs:
+    create-reel:
+        uses: "ridgeway-warrior/video-maker/.github/workflows/create_video.yml@main"
+        secrets: inherit
+    publish_reel:
+        needs: create-reel
+        uses: "ridgeway-warrior/ig-reel-uploader/.github/workflows/publish_video.yml@master" 
+        secrets: inherit
+    
+
+

@@ -1,0 +1,53 @@
+name: Deploy AWS Lambda IG Token Updater
+
+on:
+  push:
+    branches: 
+      - master
+    paths:
+      - 'lambda-update-token/**'
+  workflow_dispatch:
+
+concurrency:
+  group: 'lambda-update-deploy'
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC authentication
+      contents: read  # Required to check out the repository
+    steps:
+      - uses: actions/checkout@v7
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::781911158210:role/Github_Actions_Ridgeway_Warrior
+          aws-region: us-west-2
+      
+      - name: Setup Node
+        uses: "actions/setup-node@v7.0.0"
+        with: 
+          node-version: 24.14
+      
+      - name: setup pnpm and install dependencies
+        uses: pnpm/action-setup@v6.0.9
+        with:
+          version: 11.13
+          cache: true
+          cache_dependency_path: lambda-update-token/pnpm-lock.yaml
+          run_install: |
+            cwd: lambda-update-token
+
+      - name: Build application with ESBuild
+        run: |
+          cd lambda-update-token
+          pnpm build
+
+      - name: Deploy Lambda Function
+        uses: aws-actions/aws-lambda-deploy@v1
+        with:
+          function-name: ridgeway-warrior-secret-change
+          code-artifacts-dir: lambda-update-token/dist

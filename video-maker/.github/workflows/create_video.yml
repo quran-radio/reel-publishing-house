@@ -1,0 +1,22 @@
+name: Video Creator
+on: workflow_call
+
+jobs:
+    create_video:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: "actions/checkout@main"
+              with:
+                repository: "ridgeway-warrior/video-maker"
+            - uses: "actions/setup-node@main"
+            - uses: "pnpm/action-setup@master"
+              with: 
+                version: 11.7
+            - run: pnpm ci
+            - run: echo "OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}}" >> .env
+            - run: pnpm remotion render MyComp video.mp4
+            - uses: "actions/upload-artifact@main"
+              with:
+                name: remotion-video
+                path: video.mp4
+

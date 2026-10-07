@@ -1,0 +1,36 @@
+{
+  "name": "lambda-update-token",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf dist && esbuild ./index.ts --bundle --minify --platform=node --target=node24.14 --outdir=dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.15.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.2",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "typescript-eslint": "^8.65.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.1097.0",
+    "@octokit/rest": "^22.0.1",
+    "libsodium-wrappers": "^0.8.4"
+  }
+}

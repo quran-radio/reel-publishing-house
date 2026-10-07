@@ -1,0 +1,25 @@
+name: publish video to instagram
+on: workflow_call
+
+jobs:
+    publish_video:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: "actions/checkout@main"
+              with:
+                repository: ridgeway-warrior/ig-reel-uploader
+            - uses: "actions/setup-node@main"
+            - uses: "pnpm/action-setup@master"
+              with:
+                version: 11.7
+            - run: "pnpm ci"
+            - uses: "actions/download-artifact@main"
+              with:
+                name: remotion-video
+            - run: |
+                echo S3_ID=${{secrets.S3_ID}} >> .env
+                echo S3_SECRET=${{secrets.S3_SECRET}} >> .env
+                echo ENDPOINT=${{secrets.ENDPOINT}} >> .env
+                echo IG_TOKEN=${{secrets.IG_TOKEN}} >> .env
+                echo IG_USER_ID=${{secrets.IG_USER_ID}} >> .env
+            - run: node index.js
