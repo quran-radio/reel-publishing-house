@@ -1,7 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playpen+Sans+Arabic:wght@100..800&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: "UthmanicHafs";
+  src:
+    url("https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2")
+      format("woff2"),
+    url("https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.ttf")
+      format("truetype");
+  font-display: swap;
+}
 
-@theme{
-    --font-playpen: "Playpen Sans Arabic"
+@theme {
+  --font-uthmani: "UthmanicHafs", "Traditional Arabic", serif;
 }

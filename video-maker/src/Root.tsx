@@ -1,9 +1,9 @@
 import "./index.css";
-import { Composition } from "remotion";
+import { Composition, staticFile } from "remotion";
 import { MyComposition } from "./Composition";
-import { ridgeway_boss } from "./ai";
 
 export const RemotionRoot: React.FC = () => {
+  const quranJson = staticFile("/qpc-hafs-word-by-word.json");
   return (
     <>
       <Composition
@@ -13,15 +13,16 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
-        defaultProps={{
-          text: ""
-        }
-        }
-        calculateMetadata={async (props)=>{
-          const boss_text = await ridgeway_boss();
-          return {props: {
-            text: boss_text.content.toString()}
-          }
+        calculateMetadata={async ({ props }) => {
+          const data = await fetch(quranJson);
+          const json = await data.json();
+
+          return {
+            props: {
+              ...props,
+              data: json,
+            },
+          };
         }}
       />
     </>
