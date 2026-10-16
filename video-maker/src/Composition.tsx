@@ -1,12 +1,8 @@
-import { AbsoluteFill, Html5Audio, staticFile, useVideoConfig } from "remotion";
+import { AbsoluteFill, Html5Audio } from "remotion";
+import { WordByWord } from "./Root";
 
-export const MyComposition = ({ data }) => {
-  const { fps } = useVideoConfig();
-  let verse = "";
-  for (let i = 1; i < 5; i++) {
-    verse += data[`1:1:${i}`].text;
-    verse += " ";
-  }
+export const MyComposition = ({ data }: { data: WordByWord }) => {
+  const verse = range_verse_getter(data, 4, 5, 8);
   return (
     <>
       <AbsoluteFill className="text-7xl text-center justify-center font-uthmani font-black bg-white items-center leading-20">
@@ -23,3 +19,36 @@ export const MyComposition = ({ data }) => {
     </>
   );
 };
+
+function range_verse_getter(
+  data: WordByWord,
+  surah_number: number,
+  start_verse: number,
+  end_verse: number,
+) {
+  let range_verse = "";
+  for (let i = start_verse; i < end_verse; i++) {
+    range_verse += verse_getter(data, surah_number, i) + " ";
+  }
+
+  return range_verse;
+}
+
+function verse_getter(
+  data: WordByWord,
+  surah_number: number,
+  verse_number: number,
+) {
+  let word_exists = data[`${surah_number}:${verse_number}:${1}`];
+  let verse = "";
+  let i = 1;
+
+  while (word_exists !== undefined) {
+    verse += word_exists.text;
+    verse += " ";
+    i += 1;
+    word_exists = data[`${surah_number}:${verse_number}:${i}`];
+  }
+
+  return verse;
+}
