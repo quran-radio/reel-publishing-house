@@ -105,18 +105,25 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
         defaultProps={{
-          verses: [{ verse_text: "", verse_audio: "", duration: 0 }],
+          verses: {
+            surahMetadata: {},
+            versesArr: [{ verse_text: "", verse_audio: "", duration: 0 }],
+          },
         }}
         calculateMetadata={async ({ props }) => {
           const quranJson = staticFile("/qpc-hafs-word-by-word.json");
           const audioJson = staticFile("/mishary-recitation.json");
+          const surahMetadata = staticFile("quran-metadata-surah-name.json");
           const quranResponse: Response = await fetch(quranJson);
           const audioResponse: Response = await fetch(audioJson);
+          const surahMetadataResponse: Response = await fetch(surahMetadata);
           const quranData: WordByWord =
             (await quranResponse.json()) as WordByWord;
           const audioData: WordByWord =
             (await audioResponse.json()) as WordByWord;
-          const verses = await range_verse_getter(
+          const surahMetadataData: WordByWord =
+            (await surahMetadataResponse.json()) as WordByWord;
+          const versesArr = await range_verse_getter(
             quranData,
             audioData,
             surah,
@@ -124,7 +131,7 @@ export const RemotionRoot: React.FC = () => {
             end_verse,
           );
           let total_duration = 0;
-          for (const v of verses) {
+          for (const v of versesArr) {
             total_duration += v.duration;
           }
 
@@ -133,7 +140,10 @@ export const RemotionRoot: React.FC = () => {
             durationInFrames: Math.round(total_duration),
             props: {
               ...props,
-              verses,
+              verses: {
+                surahMetadata: surahMetadataData[surah.toString()],
+                versesArr,
+              },
             },
           };
         }}
