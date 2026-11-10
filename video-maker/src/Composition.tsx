@@ -9,15 +9,21 @@ function VerseComp({
 }) {
   return (
     <AbsoluteFill className=" text-center justify-center bg-white ">
-      <div className="flex flex-col items-center gap-15 w-full">
-        <div>
-          <div className="text-5xl font-sans">{surahMetadata["name"]}</div>
-          <div className="text-5xl font-uthmani p-6">
-            {surahMetadata["name_arabic"]}
+      <div className="px-16 py-36 bg-red-500 bg-clip-content w-full h-full">
+        <div className="flex flex-col gap-70">
+          <div className="w-full *:first:mb-8 text-6xl text-right">
+            <div className="font-uthmani text-7xl bg-amber-700 ">
+              سورة {surahMetadata["name_arabic"]}
+            </div>
+            <div className="font-serif bg-yellow-400 ">
+              Surah {surahMetadata["name"]}
+            </div>
           </div>
-        </div>
-        <div className=" w-[80%] text-7xl font-uthmani font-black leading-30">
-          {verse_text}
+          <div className="w-full bg-orange-400 text-right align-bottom">
+            <div className="w-[80%] float-right text-7xl font-uthmani font-black leading-30 bg-green-400">
+              {verse_text}
+            </div>
+          </div>
         </div>
       </div>
     </AbsoluteFill>
