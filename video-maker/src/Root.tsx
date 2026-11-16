@@ -11,15 +11,30 @@ export interface WordByWord {
   [verse: string]: Info;
 }
 
+export interface BasicAyahByAyah {
+  [verse: string]: string;
+}
+
 const fps = 30;
 
 async function range_verse_getter(
   quranData: WordByWord,
   audioData: WordByWord,
+  quranTransliterationData: BasicAyahByAyah,
+  quranTranslationData: WordByWord,
   surah_number: number,
   start_verse: number,
   end_verse: number,
-): Promise<{ verse_text: string; verse_audio: string; duration: number }[]> {
+): Promise<
+  {
+    verse: string;
+    transliteration: string;
+    translation: string;
+    verse_audio: string;
+    verse_number: number;
+    duration: number;
+  }[]
+> {
   /**
    * get a range of verses, for surah number, from start_verse to end_verse, inclusively
    * return an array, with each element containing the:
@@ -37,14 +52,25 @@ async function range_verse_getter(
       source: new UrlSource(verseAudio.audio_url),
     });
     const duration = await input.computeDuration();
+    const { verse, transliteration, translation, verse_number } = verse_getter(
+      quranData,
+      quranTransliterationData,
+      quranTranslationData,
+      1,
+      1,
+    );
     range_verse.push({
       // get basmallah from surah fatiha
-      verse_text: verse_getter(quranData, 1, 1),
+      verse,
+      transliteration,
+      translation,
+      verse_number: 0,
       verse_audio: verseAudio.audio_url,
       duration: duration * fps,
     });
-    // remove the ayah number 1 from surah fatiha
-    range_verse[0].verse_text = range_verse[0].verse_text
+
+    // remove the digit 1 (only needed for surah fatiha)
+    range_verse[0].verse = range_verse[0].verse
       .split(" ")
       .slice(0, 4)
       .join(" ");
@@ -59,8 +85,19 @@ async function range_verse_getter(
     });
 
     const durationInSeconds = await input.computeDuration();
+    const { verse, transliteration, translation, verse_number } = verse_getter(
+      quranData,
+      quranTransliterationData,
+      quranTranslationData,
+      surah_number,
+      i,
+    );
+
     range_verse.push({
-      verse_text: verse_getter(quranData, surah_number, i),
+      verse,
+      transliteration,
+      translation,
+      verse_number,
       verse_audio: verseAudio.audio_url,
       duration: durationInSeconds * fps,
     });
@@ -70,7 +107,9 @@ async function range_verse_getter(
 }
 
 function verse_getter(
-  data: WordByWord,
+  quranData: WordByWord,
+  quranTransliterationData: BasicAyahByAyah,
+  quranTranslationData: WordByWord,
   surah_number: number,
   verse_number: number,
 ) {
@@ -78,7 +117,7 @@ function verse_getter(
    * get verse text for a specific verse, from JSON
    */
 
-  let word_exists = data[`${surah_number}:${verse_number}:${1}`];
+  let word_exists = quranData[`${surah_number}:${verse_number}:${1}`];
   let verse = "";
   let i = 1;
 
@@ -86,10 +125,15 @@ function verse_getter(
     verse += word_exists.text;
     verse += " ";
     i += 1;
-    word_exists = data[`${surah_number}:${verse_number}:${i}`];
+    word_exists = quranData[`${surah_number}:${verse_number}:${i}`];
   }
 
-  return verse;
+  const transliteration =
+    quranTransliterationData[`${surah_number}:${verse_number}`];
+  const translation =
+    quranTranslationData[`${surah_number}:${verse_number}`]["t"];
+
+  return { verse, transliteration, translation, verse_number };
 }
 
 export const RemotionRoot: React.FC = () => {
@@ -107,29 +151,58 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{
           verses: {
             surahMetadata: {},
-            versesArr: [{ verse_text: "", verse_audio: "", duration: 0 }],
+            versesArr: [
+              {
+                verse: "",
+                transliteration: "",
+                translation: "",
+                verse_audio: "",
+                verse_number: 0,
+                duration: 0,
+              },
+            ],
           },
         }}
         calculateMetadata={async ({ props }) => {
           const quranJson = staticFile("/qpc-hafs-word-by-word.json");
           const audioJson = staticFile("/mishary-recitation.json");
           const surahMetadata = staticFile("quran-metadata-surah-name.json");
+          const quranTransliteration = staticFile(
+            "en-transliteration-tajweed.json",
+          );
+          const quranTranslation = staticFile(
+            "en-sahih-international-simple.json",
+          );
+
           const quranResponse: Response = await fetch(quranJson);
           const audioResponse: Response = await fetch(audioJson);
           const surahMetadataResponse: Response = await fetch(surahMetadata);
+          const quranTransliterationResponse: Response =
+            await fetch(quranTransliteration);
+          const quranTranslationResponse: Response =
+            await fetch(quranTranslation);
+
           const quranData: WordByWord =
             (await quranResponse.json()) as WordByWord;
           const audioData: WordByWord =
             (await audioResponse.json()) as WordByWord;
           const surahMetadataData: WordByWord =
             (await surahMetadataResponse.json()) as WordByWord;
+          const quranTransliterationData: BasicAyahByAyah =
+            (await quranTransliterationResponse.json()) as BasicAyahByAyah;
+          const quranTranslationData: WordByWord =
+            (await quranTranslationResponse.json()) as WordByWord;
+
           const versesArr = await range_verse_getter(
             quranData,
             audioData,
+            quranTransliterationData,
+            quranTranslationData,
             surah,
             start_verse,
             end_verse,
           );
+
           let total_duration = 0;
           for (const v of versesArr) {
             total_duration += v.duration;
