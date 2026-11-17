@@ -52,7 +52,7 @@ async function range_verse_getter(
       source: new UrlSource(verseAudio.audio_url),
     });
     const duration = await input.computeDuration();
-    const { verse, transliteration, translation, verse_number } = verse_getter(
+    const { verse, transliteration, translation } = verse_getter(
       quranData,
       quranTransliterationData,
       quranTranslationData,

@@ -39,7 +39,8 @@
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
-    "test": "vitest"
+    "test": "vitest",
+    "render": "remotion render"
   },
   "sideEffects": [
     "*.css"
